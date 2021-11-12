@@ -18,11 +18,11 @@ stack_posts = database.stack
 # machine-learning
 
 
-start = '2021-10-01'
-end = '2021-10-10'
-# start = '2021-10-11'
-# end = '2021-10-20'
-keyword = 'ROS'
+# start = '2021-10-01'
+# end = '2021-10-10'
+start = '2021-10-11'
+end = '2021-10-20'
+keyword = 'machine-learning'
 page = 1
 pagesize = 1
 filter_hash = '!2q)rrCiT-WWuvgZ)48hoMxZcWe.y.W8V49EpapgZBZ'
@@ -34,7 +34,7 @@ try:
     SITE = StackAPI('stackoverflow', key=key, access_token=access_token, fromdate=start, todate=end)
     questions = SITE.fetch('questions', tagged=keyword, sort='votes', filter=filter_hash)
     for items in questions['items']:
-        stack_posts.insert(items)
+        stack_posts.insert_one(items)
 
 except Exception as er:
     print(er.message)
