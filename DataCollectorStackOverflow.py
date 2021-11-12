@@ -13,16 +13,16 @@ stack_posts = database.stack
 
 # deep-learning
 # ROS
+# ros2
 # robotics
 # reinforcement-learning
 # machine-learning
+# artificial-intelligence
 
 
-# start = '2021-10-01'
-# end = '2021-10-10'
-start = '2021-10-11'
-end = '2021-10-20'
-keyword = 'machine-learning'
+start = '2020-3-01'
+end = '2020-6-01'
+keyword = 'ros2'
 page = 1
 pagesize = 1
 filter_hash = '!2q)rrCiT-WWuvgZ)48hoMxZcWe.y.W8V49EpapgZBZ'
@@ -32,7 +32,7 @@ key = secrets['so_key']
 try:
 
     SITE = StackAPI('stackoverflow', key=key, access_token=access_token, fromdate=start, todate=end)
-    questions = SITE.fetch('questions', tagged=keyword, sort='votes', filter=filter_hash)
+    questions = SITE.fetch('questions', tagged=keyword, sort='activity', filter=filter_hash)
     for items in questions['items']:
         stack_posts.insert_one(items)
 
