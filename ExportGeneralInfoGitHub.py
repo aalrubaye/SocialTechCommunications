@@ -36,6 +36,9 @@ sheet_header = [
     'iwhc_owner_repo',
     'iwhc_owner_type',
     'unique_commenters_percentage',
+    'iwhc_commenters_followers',
+    'iwhc_commentors_following',
+    'iwhc_commentors_rpo',
     'mpc_followers',
     'mpc_following',
     'mpc_repos',
@@ -61,7 +64,7 @@ def extract_general_info():
 
         total_comments = sum(issue['issue_comments_count'] for issue in repo['repo_issues'])
         avg_issue_author_followers = sum(issue['issue_author']['followers_count'] for issue in repo['repo_issues'])
-        avg_issue_author_followeing = sum(issue['issue_author']['following_count'] for issue in repo['repo_issues'])
+        avg_issue_author_following = sum(issue['issue_author']['following_count'] for issue in repo['repo_issues'])
         avg_issue_author_repo = sum(issue['issue_author']['repos_count'] for issue in repo['repo_issues'])
 
         high_commenters_followers = 0
@@ -82,6 +85,9 @@ def extract_general_info():
 
         if iwhc['issue_comments']:
             mpc = max(iwhc['issue_comments'], key=lambda x:x['comment_author']['followers_count'] if x['is_issue_author'] is False else 0)
+            commenters_followers = sum(comms['comment_author']['followers_count'] for comms in iwhc['issue_comments'])
+            commenters_following = sum(comms['comment_author']['following_count'] for comms in iwhc['issue_comments'])
+            commenters_repo = sum(comms['comment_author']['repos_count'] for comms in iwhc['issue_comments'])
 
         data_object = {
             'name': repo['repo_name'],
@@ -96,7 +102,7 @@ def extract_general_info():
             'owner_type': repo['repo_owner']['type'],
             'avg_comments_per_issue' : total_comments / float(len(repo['repo_issues'])),
             'avg_owners_followers' : avg_issue_author_followers / float(len(repo['repo_issues'])),
-            'avg_owners_following' : avg_issue_author_followeing / float(len(repo['repo_issues'])),
+            'avg_owners_following' : avg_issue_author_following / float(len(repo['repo_issues'])),
             'avg_owners_repos' : avg_issue_author_repo / float(len(repo['repo_issues'])),
 
             'avg_high_commenters_followers': high_commenters_followers / float(len(repo['repo_issues'])),
@@ -110,6 +116,9 @@ def extract_general_info():
             'iwhc_owner_repo': iwhc['issue_author']['repos_count'],
             'iwhc_owner_type': iwhc['issue_author']['type'],
             'unique_commenters_percentage': unique_commenters / float(len(iwhc['issue_comments'])) if iwhc['issue_comments'] else None,
+            'iwhc_commenters_followers': commenters_followers / float(unique_commenters) if unique_commenters > 0 else 0,
+            'iwhc_commentors_following': commenters_following / float(unique_commenters) if unique_commenters > 0 else 0,
+            'iwhc_commentors_rpo': commenters_repo / float(unique_commenters) if unique_commenters > 0 else 0,
 
             # # mpc = most popular commenter on iwhc that is not the owner of the comment
             'mpc_followers': mpc['comment_author']['followers_count'] if mpc else None,
@@ -119,7 +128,7 @@ def extract_general_info():
         }
 
         pprint.pprint(data_object)
-        print '*'*100
+        print('*'*100)
         export_to_sheet(data_object, ii)
         ii += 1
     results.save("GitHubGeneralInfo.xls")
@@ -129,6 +138,3 @@ def extract_general_info():
 found = 0
 if __name__ == "__main__":
     extract_general_info()
-
-
-
