@@ -18,11 +18,11 @@ stack_posts = database.stack
 # machine-learning
 
 
-# start = '2021-09-01'
-# end = '2021-09-10'
-start = '2021-09-11'
-end = '2021-09-20'
-keyword = 'machine-learning'
+start = '2021-10-01'
+end = '2021-10-10'
+# start = '2021-10-11'
+# end = '2021-10-20'
+keyword = 'ROS'
 page = 1
 pagesize = 1
 filter_hash = '!2q)rrCiT-WWuvgZ)48hoMxZcWe.y.W8V49EpapgZBZ'
