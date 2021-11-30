@@ -41,3 +41,4 @@ privateVar.txt
 *.txt
 *.env
 secrets.json
+*.xls

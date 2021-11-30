@@ -4,6 +4,7 @@ import pprint
 from pymongo import MongoClient
 import xlwt
 from collections import Counter
+import correlations
 
 client = MongoClient()
 database = client.stack_overflow
@@ -42,7 +43,11 @@ sheet_header = [
     'mpc_followers',
     'mpc_following',
     'mpc_repos',
-    'mpc_type'
+    'mpc_type',
+    'iwhc_correl_r',
+    'iwhc_correl_p',
+    'mpc_comment_order',
+    'mpc_comments_count'
 ]
 
 
@@ -82,12 +87,35 @@ def extract_general_info():
 
         iwhc = max(repo['repo_issues'], key=lambda x:x['issue_comments_count'])
         unique_commenters = Counter(r['is_issue_author'] is False for r in iwhc['issue_comments'])[1]
+        correl_r = None
+        correl_p = None
 
         if iwhc['issue_comments']:
             mpc = max(iwhc['issue_comments'], key=lambda x:x['comment_author']['followers_count'] if x['is_issue_author'] is False else 0)
+
+            mpc_order = None
+            dd = []
+            ind = 0
+            mpc_comments_count = 0
+
+            for comnts in iwhc['issue_comments']:
+                dd.append(comnts['comment_author']['followers_count'])
+                if comnts['comment_author']['id'] == mpc['comment_author']['id']:
+                    mpc_order = ind
+                    mpc_comments_count += 1
+                ind += 1
+
+            ff = list(range(0, len(dd)))
+            correl = correlations.coeff(dd, ff)
+            correl_r = correl[0]
+            correl_p = correl[1]
+
             commenters_followers = sum(comms['comment_author']['followers_count'] for comms in iwhc['issue_comments'])
             commenters_following = sum(comms['comment_author']['following_count'] for comms in iwhc['issue_comments'])
             commenters_repo = sum(comms['comment_author']['repos_count'] for comms in iwhc['issue_comments'])
+
+
+
 
         data_object = {
             'name': repo['repo_name'],
@@ -124,7 +152,11 @@ def extract_general_info():
             'mpc_followers': mpc['comment_author']['followers_count'] if mpc else None,
             'mpc_following': mpc['comment_author']['following_count'] if mpc else None,
             'mpc_repos': mpc['comment_author']['repos_count'] if mpc else None,
-            'mpc_type': mpc['comment_author']['type'] if mpc else None
+            'mpc_type': mpc['comment_author']['type'] if mpc else None,
+            'iwhc_correl_r': correl_r,
+            'iwhc_correl_p': correl_p,
+            'mpc_comment_order': mpc_order / float(len(iwhc['issue_comments'])) if iwhc['issue_comments'] else None,
+            'mpc_comments_count': mpc_comments_count
         }
 
         pprint.pprint(data_object)

@@ -29,7 +29,7 @@ with open('urls.txt') as fff:
 
 for l in lines :
     if l not in lines_url:
-        print l
+        print (l)
 
 
 

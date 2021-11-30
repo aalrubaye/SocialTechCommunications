@@ -28,7 +28,7 @@ def fetch(from_url):
 
     if remaining_calls < 10:
         while remaining_calls < 10:
-            print 'rate limit is almost exceeded... waiting'
+            print ('rate limit is almost exceeded... waiting')
             time.sleep(20)
             fetch_remaining()
 
@@ -36,7 +36,7 @@ def fetch(from_url):
     try:
         return requests.get(from_url, headers=headers).json()
     except Exception as er:
-        print "error in fetching the url :" + str(er.message)
+        print ("error in fetching the url :" + str(er.message))
         return None
 
 
@@ -66,9 +66,9 @@ def extract_issue_data_from_repo(url):
         auth_objs = []
 
         response = fetch(url+"?page=1&per_page=100")
-        print '-'*50
-        print "repo ("+str(response['name'])+") --> url = " + url
-        print '-'*50
+        print ('-'*50)
+        print ("repo ("+str(response['name'])+") --> url = " + url)
+        print ('-'*50)
 
         if response:
             issues_list = []
@@ -78,7 +78,7 @@ def extract_issue_data_from_repo(url):
                 totlIssues = fetch(url+"/issues?per_page=1&state=all")
                 pprint.pprint(totlIssues[0]['number'])
                 for issue in issues:
-                    print "repo ("+str(response['name'])+") --> issue # "+str(issue['number'])
+                    print ("repo ("+str(response['name'])+") --> issue # "+str(issue['number']))
                     issue_author = extract_owner_info(issue['user'])
 
                     comments_list = []
@@ -140,8 +140,8 @@ def extract_issue_data_from_repo(url):
                 }
                 # pprint.pprint(data_object)
 
-                print 'Done with repo '+str(response['name'])
-                print '.'*100
+                print ('Done with repo '+str(response['name']))
+                print ('.'*100)
                 git_repos.insert(data_object)
 
     except Exception as er:

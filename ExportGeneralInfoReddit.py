@@ -3,6 +3,7 @@ __author__ = 'Abduljaleel'
 import pprint
 from pymongo import MongoClient
 import xlwt
+import correlations
 
 client = MongoClient()
 database = client.reddit
@@ -37,7 +38,12 @@ sheet_header = ['subreddit',
                 'hr_score',
                 'hr_ack',
                 'hr_parent_comment_score',
-                'hr_parent_comment_ack']
+                'hr_parent_comment_ack',
+                'correl_r',
+                'correl_p',
+                'hc_order',
+                'hc_comments_count'
+                ]
 
 
 def export_to_sheet(entry, row):
@@ -73,12 +79,31 @@ def extract_general_info():
         hr_ack = 0
         hr_parent_comment_score = 0
         hr_parent_comment_ack = 0
+        correl_r = None
+        correl_p = None
+        hc_order = None
+        hc_comments_count = None
 
         if comments_array:
             highest_comment = max(comments_array, key=lambda x:x['score'])
             hc_score = highest_comment['score']
             hc_ack = highest_comment['author']['comment_karma']
             hc_reply_count = len(highest_comment['replies'])
+
+            dd = []
+            ind = 0
+            hc_comments_count = 0
+            for comnts in comments_array:
+                dd.append(comnts['author']['comment_karma'])
+                if comnts['author']['id'] == highest_comment['author']['id']:
+                    hc_order = ind
+                    hc_comments_count += 1
+                ind += 1
+
+            ff = list(range(0, len(dd)))
+            correl = correlations.coeff(dd, ff)
+            correl_r = correl[0]
+            correl_p = correl[1]
 
             if highest_comment['replies']:
                 hc_hr = max(highest_comment['replies'], key=lambda x:x['score'])
@@ -94,9 +119,11 @@ def extract_general_info():
                 reps = com['replies']
                 if reps:
                     mx_tmp = max(reps, key=lambda x:x['score'])
-                    hr_array.append(mx_tmp)
+                    if mx_tmp['score']:
+                        hr_array.append(mx_tmp)
 
             if hr_array:
+                print (hr_array)
                 highest_reply = max(hr_array, key=lambda x:x['score'])
                 hr_score = highest_reply['score']
                 hr_ack = highest_reply['author']['comment_karma']
@@ -133,13 +160,19 @@ def extract_general_info():
                         'hr_score': hr_score,
                         'hr_ack': hr_ack,
                         'hr_parent_comment_score': hr_parent_comment_score,
-                        'hr_parent_comment_ack': hr_parent_comment_ack
+                        'hr_parent_comment_ack': hr_parent_comment_ack,
+                        # correl_r: shows the R value of the correlation between the commentors popularity and the order of their comment
+                        # the more positive the correlation is the more popular commentors are commenting toward the end of the conversation
+                        'correl_r': correl_r,
+                        'correl_p': correl_p,
+                        'hc_order': hc_order,
+                        'hc_comments_count': hc_comments_count
         }
 
         export_to_sheet(data_object, ii)
 
-        # pprint.pprint(data_object)
-        print '*'*100
+        pprint.pprint(data_object)
+        print ('*'*100)
         # if ii > 4:
         #     break
         ii += 1
